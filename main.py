@@ -1,9 +1,6 @@
 # encoding=utf-8
-import sys
-
 from py2neo import *
 from zhihu_crawler import *
-from time import sleep
 from pymongo import MongoClient
 
 __author__ = 'tripleday'
@@ -15,9 +12,6 @@ MONGO_USER_COLL = 'user'
 MONGO = MongoClient(MONGO_HOST, MONGO_PORT)
 
 NEO4J_ADDRESS = 'http://localhost:7474/db/data/'
-NODE_NAME = 'zhUser'
-
-ZHIHU_COOKIE = ''
 
 GRAPH = Graph(NEO4J_ADDRESS)
 # CYPHER_FIND_USER = "MATCH (user:" + NODE_NAME + " {%s:'%s'}) RETURN user LIMIT 1"
