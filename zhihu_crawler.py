@@ -1,57 +1,8 @@
 # -*- coding: utf-8 -*-
-'''
-                                                                                         ;$$;
-                                                                                    #############
-                                                                               #############;#####o
-                                                      ##                 o#########################
-                                                      #####         $###############################
-                                                      ##  ###$ ######!    ##########################
-                           ##                        ###    $###          ################### ######
-                           ###                      ###                   ##o#######################
-                          ######                  ;###                    #### #####################
-                          ##  ###             ######                       ######&&################
-                          ##    ###      ######                            ## ############ #######
-                         o##      ########                                  ## ##################
-                         ##o                ###                             #### #######o#######
-                         ##               ######                             ###########&#####
-                         ##                ####                               #############!
-                        ###                                                     #########
-               #####&   ##                                                      o####
-             ######     ##                                                   ####*
-                  ##   !##                                               #####
-                   ##  ##*                                            ####; ##
-                    #####                                          #####o   #####
-                     ####                                        ### ###   $###o
-                      ###                                            ## ####! $###
-                      ##                                            #####
-                      ##                                            ##
-                     ;##                                           ###                           ;
-                     ##$                                           ##
-                #######                                            ##
-            #####   &##                                            ##
-          ###       ###                                           ###
-         ###      ###                                             ##
-         ##     ;##                                               ##
-         ##    ###                                                ##
-          ### ###                                                 ##
-            ####                                                  ##
-             ###                                                  ##
-             ##;                                                  ##
-             ##$                                                 ##&
-              ##                                                 ##
-              ##;                                               ##
-               ##                                              ##;
-                ###                                          ###         ##$
-                  ###                                      ###           ##
-   ######################                              #####&&&&&&&&&&&&###
- ###        $#####$     ############&$o$&################################
- #                               $&########&o
-'''
 
-import os, sys, time, platform, random
-import re, json, cookielib
 # requirements
-import requests, termcolor, html2text
+import re, json
+import requests
 from bs4 import BeautifulSoup
 
 
@@ -109,7 +60,10 @@ class User:
 
     def parser(self):
         self.r = rq.get(self.user_url)
-        soup = BeautifulSoup(self.r.content, "lxml")
+        # while self.r.status_code!=200:
+        #     self.r = rq.get(self.user_url)
+        #     print self.r.text
+        soup = BeautifulSoup(self.r.content, "html.parser")# html.parser is better than lxml
         self.soup = soup
 
     def get_user_id(self):
@@ -188,8 +142,11 @@ class User:
             else:
                 followee_url = self.user_url + "/followees"
                 r = rq.get(followee_url)
+                # while r.status_code!=200:
+                #     r = rq.get(followee_url)
+                #     print r.text
 
-                soup = BeautifulSoup(r.content, "lxml")
+                soup = BeautifulSoup(r.content, "html.parser")
                 for i in xrange((followees_num - 1) / 20 + 1):
                     if i == 0:
                         user_url_list = soup.find_all("h2", class_="zm-list-content-title")
@@ -218,7 +175,7 @@ class User:
 
                         followee_list = r_post.json()["msg"]
                         for j in xrange(len(followee_list)):
-                            followee_soup = BeautifulSoup(followee_list[j], "lxml")
+                            followee_soup = BeautifulSoup(followee_list[j], "html.parser")
                             user_link = followee_soup.find("h2", class_="zm-list-content-title").a
                             data_id = followee_soup.find('button')['data-id'] if followee_soup.find('button') else None # no button, actually when the followee is yourself
                             yield User(user_link["href"], user_link.string.encode("utf-8"), data_id)
@@ -234,8 +191,11 @@ class User:
             else:
                 follower_url = self.user_url + "/followers"
                 r = rq.get(follower_url)
+                # while r.status_code!=200:
+                #     r = rq.get(follower_url)
+                #     print r.text
 
-                soup = BeautifulSoup(r.content, "lxml")
+                soup = BeautifulSoup(r.content, "html.parser")
                 for i in xrange((followers_num - 1) / 20 + 1):
                     if i == 0:
                         user_url_list = soup.find_all("h2", class_="zm-list-content-title")
@@ -263,7 +223,7 @@ class User:
 
                         follower_list = r_post.json()["msg"]
                         for j in xrange(len(follower_list)):
-                            follower_soup = BeautifulSoup(follower_list[j], "lxml")
+                            follower_soup = BeautifulSoup(follower_list[j], "html.parser")
                             user_link = follower_soup.find("h2", class_="zm-list-content-title").a
                             data_id = follower_soup.find('button')['data-id'] if follower_soup.find('button') else None # no button, actually when the follower is yourself
                             yield User(user_link["href"], user_link.string.encode("utf-8"), data_id)
@@ -274,14 +234,19 @@ if __name__ == '__main__':
     #     print "islogin() != True"
     #     raise Exception(u"无权限(403)")
 
-    u = User('https://www.zhihu.com/people/wu-hao-tian-73')
+    # r = rq.get('https://www.zhihu.com/people/hong-ming-da')
+    # print r.content
+
+    u = User('https://www.zhihu.com/people/hong-ming-da')
+    # bad url test, switch from lxml to http.parser
+
     # print u.user_id
     # print u.data_id
     print u.get_followers_num()
     # print u.get_followers()
     print u.get_followees_num()
     for i in u.get_followees():
-        print i.user_id
         print i.data_id
+        print i.user_id
     # print u.get_followees()
     print u.get_gender()
